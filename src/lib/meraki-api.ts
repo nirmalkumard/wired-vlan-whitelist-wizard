@@ -1,9 +1,9 @@
 
-// Meraki API implementation with production-ready error handling
-// Note: Direct browser access to Meraki API is blocked by CORS
-// In production, this should be proxied through a backend service
+// Meraki API implementation with development proxy support
+// Uses Vite proxy in development, direct API in production
 
-const API_BASE_URL = "https://api.meraki.com/api/v1";
+const isDevelopment = import.meta.env.DEV;
+const API_BASE_URL = isDevelopment ? "/api/meraki" : "https://api.meraki.com/api/v1";
 
 class MerakiAPIError extends Error {
   constructor(message: string, public status?: number) {
@@ -34,11 +34,12 @@ export const merakiApi = {
     } catch (error) {
       console.error('Error fetching organizations:', error);
       
-      // Handle CORS error specifically
+      // Handle CORS error specifically (should not happen in dev with proxy)
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new MerakiAPIError(
-          'Unable to connect to Meraki API directly from browser. This application requires a backend proxy service to function in production. Please contact your administrator.'
-        );
+        const errorMessage = isDevelopment 
+          ? 'Connection failed. Please check your internet connection and API key.'
+          : 'Unable to connect to Meraki API directly from browser. This application requires a backend proxy service to function in production.';
+        throw new MerakiAPIError(errorMessage);
       }
       
       throw error;
@@ -67,9 +68,10 @@ export const merakiApi = {
       console.error('Error fetching networks:', error);
       
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new MerakiAPIError(
-          'Unable to connect to Meraki API. Backend proxy service required for production use.'
-        );
+        const errorMessage = isDevelopment 
+          ? 'Connection failed. Please check your internet connection and API key.'
+          : 'Unable to connect to Meraki API. Backend proxy service required for production use.';
+        throw new MerakiAPIError(errorMessage);
       }
       
       throw error;
@@ -99,9 +101,10 @@ export const merakiApi = {
       console.error('Error fetching SSIDs:', error);
       
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new MerakiAPIError(
-          'Unable to connect to Meraki API. Backend proxy service required for production use.'
-        );
+        const errorMessage = isDevelopment 
+          ? 'Connection failed. Please check your internet connection and API key.'
+          : 'Unable to connect to Meraki API. Backend proxy service required for production use.';
+        throw new MerakiAPIError(errorMessage);
       }
       
       throw error;
@@ -132,9 +135,10 @@ export const merakiApi = {
       console.error('Error fetching devices:', error);
       
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new MerakiAPIError(
-          'Unable to connect to Meraki API. Backend proxy service required for production use.'
-        );
+        const errorMessage = isDevelopment 
+          ? 'Connection failed. Please check your internet connection and API key.'
+          : 'Unable to connect to Meraki API. Backend proxy service required for production use.';
+        throw new MerakiAPIError(errorMessage);
       }
       
       throw error;
@@ -163,9 +167,10 @@ export const merakiApi = {
       console.error('Error fetching switch ports:', error);
       
       if (error instanceof TypeError && error.message === 'Failed to fetch') {
-        throw new MerakiAPIError(
-          'Unable to connect to Meraki API. Backend proxy service required for production use.'
-        );
+        const errorMessage = isDevelopment 
+          ? 'Connection failed. Please check your internet connection and API key.'
+          : 'Unable to connect to Meraki API. Backend proxy service required for production use.';
+        throw new MerakiAPIError(errorMessage);
       }
       
       throw error;
