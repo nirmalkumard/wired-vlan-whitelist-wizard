@@ -1,9 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Copy, RotateCcw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { CheckCircle, Copy, RotateCcw, Send, Loader2 } from 'lucide-react';
 import { FormData } from '../WifiOperationsForm';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,6 +21,8 @@ export const ConfigurationOutput: React.FC<Props> = ({
   onReset
 }) => {
   const { toast } = useToast();
+  const [webhookUrl, setWebhookUrl] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const outputJson = {
     orgId: formData.organizationId,
@@ -35,6 +39,52 @@ export const ConfigurationOutput: React.FC<Props> = ({
       title: "Copied to clipboard",
       description: "Configuration JSON has been copied to your clipboard.",
     });
+  };
+
+  const submitToWebhook = async () => {
+    if (!webhookUrl) {
+      toast({
+        title: "Error",
+        description: "Please enter your n8n webhook URL",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    console.log("Submitting to n8n webhook:", webhookUrl);
+
+    try {
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...outputJson,
+          timestamp: new Date().toISOString(),
+          source: "wifi-operations-form"
+        }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Configuration submitted to n8n workflow successfully!",
+        });
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error submitting to webhook:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit to n8n webhook. Please check the URL and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -113,11 +163,43 @@ export const ConfigurationOutput: React.FC<Props> = ({
         </Card>
       </div>
 
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader>
+          <CardTitle className="text-lg text-blue-800">Submit to n8n Workflow</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="webhook-url">n8n Webhook URL</Label>
+            <Input
+              id="webhook-url"
+              type="url"
+              placeholder="https://your-n8n-instance.com/webhook/your-webhook-id"
+              value={webhookUrl}
+              onChange={(e) => setWebhookUrl(e.target.value)}
+              className="mt-1"
+            />
+          </div>
+          <Button 
+            onClick={submitToWebhook}
+            disabled={isSubmitting || !webhookUrl}
+            className="w-full flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Send className="w-4 h-4" />
+            )}
+            {isSubmitting ? 'Submitting...' : 'Submit to n8n Workflow'}
+          </Button>
+        </CardContent>
+      </Card>
+
       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
         <h4 className="text-sm font-medium text-green-800 mb-2">Next Steps</h4>
         <ul className="text-sm text-green-700 space-y-1 list-disc list-inside">
-          <li>Copy the JSON configuration above</li>
-          <li>Use this configuration with your Meraki API integration</li>
+          <li>Enter your n8n webhook URL above and submit the configuration</li>
+          <li>The n8n workflow will receive the configuration data automatically</li>
+          <li>Use the configuration with your Meraki API integration in n8n</li>
           <li>Apply the MAC whitelisting and VLAN tagging to the specified port</li>
           <li>Verify the configuration in your Meraki dashboard</li>
         </ul>
