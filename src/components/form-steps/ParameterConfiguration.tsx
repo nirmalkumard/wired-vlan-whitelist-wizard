@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -14,13 +13,15 @@ interface Props {
   updateFormData: (updates: Partial<FormData>) => void;
   onComplete: () => void;
   onBack: () => void;
+  apiKey: string;
 }
 
 export const ParameterConfiguration: React.FC<Props> = ({
   formData,
   updateFormData,
   onComplete,
-  onBack
+  onBack,
+  apiKey
 }) => {
   const [ssids, setSSIDs] = useState<any[]>([]);
   const [devices, setDevices] = useState<any[]>([]);
@@ -55,10 +56,10 @@ export const ParameterConfiguration: React.FC<Props> = ({
     try {
       setLoadingSSIDs(true);
       setError('');
-      const wirelessSSIDs = await merakiApi.getWirelessSSIDs(formData.networkId);
+      const wirelessSSIDs = await merakiApi.getWirelessSSIDs(formData.networkId, apiKey);
       setSSIDs(wirelessSSIDs);
     } catch (err) {
-      setError('Failed to load SSIDs. Please check your API configuration.');
+      setError('Failed to load SSIDs. Please check your API key and permissions.');
       console.error('Error loading SSIDs:', err);
     } finally {
       setLoadingSSIDs(false);
@@ -69,10 +70,10 @@ export const ParameterConfiguration: React.FC<Props> = ({
     try {
       setLoadingDevices(true);
       setError('');
-      const networkDevices = await merakiApi.getNetworkDevices(formData.networkId);
+      const networkDevices = await merakiApi.getNetworkDevices(formData.networkId, apiKey);
       setDevices(networkDevices);
     } catch (err) {
-      setError('Failed to load devices. Please check your API configuration.');
+      setError('Failed to load devices. Please check your API key and permissions.');
       console.error('Error loading devices:', err);
     } finally {
       setLoadingDevices(false);
@@ -83,7 +84,7 @@ export const ParameterConfiguration: React.FC<Props> = ({
     try {
       setLoadingPorts(true);
       setError('');
-      const switchPorts = await merakiApi.getSwitchPorts(serialNo);
+      const switchPorts = await merakiApi.getSwitchPorts(serialNo, apiKey);
       setPorts(switchPorts);
     } catch (err) {
       setError('Failed to load ports for selected device.');

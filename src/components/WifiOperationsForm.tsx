@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrganizationalContext } from './form-steps/OrganizationalContext';
 import { ParameterConfiguration } from './form-steps/ParameterConfiguration';
 import { ConfigurationOutput } from './form-steps/ConfigurationOutput';
+import { ApiConfiguration } from './ApiConfiguration';
 import { Badge } from '@/components/ui/badge';
 
 export interface FormData {
@@ -27,7 +28,8 @@ export interface FormData {
 }
 
 export const WifiOperationsForm = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0); // Start with API configuration
+  const [apiKey, setApiKey] = useState('');
   const [formData, setFormData] = useState<FormData>({
     organizationId: '',
     organizationName: '',
@@ -47,6 +49,11 @@ export const WifiOperationsForm = () => {
 
   const updateFormData = (updates: Partial<FormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleApiKeySet = (key: string) => {
+    setApiKey(key);
+    setCurrentStep(1); // Move to organizational context
   };
 
   const handleStepComplete = () => {
@@ -78,40 +85,50 @@ export const WifiOperationsForm = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Progress Indicator */}
-          <Card className="border-slate-200 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                {[1, 2, 3].map((step) => (
-                  <div key={step} className="flex items-center">
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-colors ${
-                      getStepStatus(step) === 'completed'
-                        ? 'bg-green-500 text-white'
-                        : getStepStatus(step) === 'active'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-200 text-slate-600'
-                    }`}>
-                      {step}
-                    </div>
-                    <div className="ml-3">
-                      <div className={`text-sm font-medium ${
-                        getStepStatus(step) === 'active' ? 'text-blue-600' : 'text-slate-600'
+          {/* API Configuration Step */}
+          {currentStep === 0 && (
+            <ApiConfiguration 
+              onApiKeySet={handleApiKeySet}
+              apiKey={apiKey}
+            />
+          )}
+
+          {/* Progress Indicator - Only show after API key is set */}
+          {currentStep > 0 && (
+            <Card className="border-slate-200 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  {[1, 2, 3].map((step) => (
+                    <div key={step} className="flex items-center">
+                      <div className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-colors ${
+                        getStepStatus(step) === 'completed'
+                          ? 'bg-green-500 text-white'
+                          : getStepStatus(step) === 'active'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-200 text-slate-600'
                       }`}>
-                        {step === 1 && 'Organizational Context'}
-                        {step === 2 && 'Configure Parameters'}
-                        {step === 3 && 'Review & Output'}
+                        {step}
                       </div>
+                      <div className="ml-3">
+                        <div className={`text-sm font-medium ${
+                          getStepStatus(step) === 'active' ? 'text-blue-600' : 'text-slate-600'
+                        }`}>
+                          {step === 1 && 'Organizational Context'}
+                          {step === 2 && 'Configure Parameters'}
+                          {step === 3 && 'Review & Output'}
+                        </div>
+                      </div>
+                      {step < 3 && (
+                        <div className={`ml-6 w-16 h-0.5 ${
+                          getStepStatus(step) === 'completed' ? 'bg-green-500' : 'bg-slate-200'
+                        }`} />
+                      )}
                     </div>
-                    {step < 3 && (
-                      <div className={`ml-6 w-16 h-0.5 ${
-                        getStepStatus(step) === 'completed' ? 'bg-green-500' : 'bg-slate-200'
-                      }`} />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Step Content */}
           {currentStep === 1 && (
@@ -129,6 +146,7 @@ export const WifiOperationsForm = () => {
                   formData={formData}
                   updateFormData={updateFormData}
                   onComplete={handleStepComplete}
+                  apiKey={apiKey}
                 />
               </CardContent>
             </Card>
@@ -150,6 +168,7 @@ export const WifiOperationsForm = () => {
                   updateFormData={updateFormData}
                   onComplete={handleStepComplete}
                   onBack={() => handleBackToStep(1)}
+                  apiKey={apiKey}
                 />
               </CardContent>
             </Card>
@@ -170,7 +189,8 @@ export const WifiOperationsForm = () => {
                   formData={formData}
                   onBack={() => handleBackToStep(2)}
                   onReset={() => {
-                    setCurrentStep(1);
+                    setCurrentStep(0);
+                    setApiKey('');
                     setFormData({
                       organizationId: '',
                       organizationName: '',

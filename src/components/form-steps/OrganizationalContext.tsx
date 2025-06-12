@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -12,12 +11,14 @@ interface Props {
   formData: FormData;
   updateFormData: (updates: Partial<FormData>) => void;
   onComplete: () => void;
+  apiKey: string;
 }
 
 export const OrganizationalContext: React.FC<Props> = ({
   formData,
   updateFormData,
-  onComplete
+  onComplete,
+  apiKey
 }) => {
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [networks, setNetworks] = useState<any[]>([]);
@@ -39,10 +40,10 @@ export const OrganizationalContext: React.FC<Props> = ({
     try {
       setLoadingOrgs(true);
       setError('');
-      const orgs = await merakiApi.getOrganizations();
+      const orgs = await merakiApi.getOrganizations(apiKey);
       setOrganizations(orgs);
     } catch (err) {
-      setError('Failed to load organizations. Please check your API configuration.');
+      setError('Failed to load organizations. Please check your API key and network connection.');
       console.error('Error loading organizations:', err);
     } finally {
       setLoadingOrgs(false);
@@ -53,7 +54,7 @@ export const OrganizationalContext: React.FC<Props> = ({
     try {
       setLoadingNetworks(true);
       setError('');
-      const nets = await merakiApi.getNetworks(orgId);
+      const nets = await merakiApi.getNetworks(orgId, apiKey);
       setNetworks(nets);
     } catch (err) {
       setError('Failed to load networks for selected organization.');
