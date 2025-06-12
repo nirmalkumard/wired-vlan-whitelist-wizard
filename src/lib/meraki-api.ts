@@ -50,35 +50,42 @@ export const merakiApi = {
     return networksByOrg[organizationId as keyof typeof networksByOrg] || [];
   },
 
-  async getDevices(organizationId: string) {
+  async getWirelessSSIDs(networkId: string) {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise(resolve => setTimeout(resolve, 600));
     
     // Mock data - replace with actual API call
-    const devicesByOrg = {
-      "org1": [
+    return [
+      { number: 0, name: "Corporate WiFi", enabled: true },
+      { number: 1, name: "Guest Network", enabled: true },
+      { number: 2, name: "IoT Devices", enabled: true },
+      { number: 3, name: "Employee WiFi", enabled: false }
+    ].filter(ssid => ssid.enabled);
+  },
+
+  async getNetworkDevices(networkId: string) {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Mock data - replace with actual API call - only MS devices
+    const devicesByNetwork = {
+      "net1": [
         { serial: "Q2XX-XXXX-XX01", name: "Main Switch 1", model: "MS250-24" },
         { serial: "Q2XX-XXXX-XX02", name: "Main Switch 2", model: "MS250-48" },
         { serial: "Q2XX-XXXX-XX03", name: "Access Switch 1", model: "MS120-24" }
       ],
-      "org2": [
-        { serial: "Q2XX-XXXX-XX04", name: "Core Switch", model: "MS350-24X" },
-        { serial: "Q2XX-XXXX-XX05", name: "Lab Switch", model: "MS220-24" },
-        { serial: "Q2XX-XXXX-XX06", name: "DC Switch", model: "MS390-24" }
+      "net2": [
+        { serial: "Q2XX-XXXX-XX04", name: "NYC Core Switch", model: "MS350-24X" },
+        { serial: "Q2XX-XXXX-XX05", name: "NYC Access Switch", model: "MS220-24" }
       ],
-      "org3": [
-        { serial: "Q2XX-XXXX-XX07", name: "London Core", model: "MS250-24" },
-        { serial: "Q2XX-XXXX-XX08", name: "Paris Access", model: "MS120-48" },
-        { serial: "Q2XX-XXXX-XX09", name: "Berlin Dist", model: "MS220-24" }
-      ],
-      "org4": [
-        { serial: "Q2XX-XXXX-XX10", name: "HQ Core Switch", model: "MS350-48" },
-        { serial: "Q2XX-XXXX-XX11", name: "Mfg Floor Switch", model: "MS250-24" },
-        { serial: "Q2XX-XXXX-XX12", name: "Warehouse Switch", model: "MS120-24" }
+      "net3": [
+        { serial: "Q2XX-XXXX-XX06", name: "Warehouse Switch", model: "MS390-24" }
       ]
     };
     
-    return devicesByOrg[organizationId as keyof typeof devicesByOrg] || [];
+    const devices = devicesByNetwork[networkId as keyof typeof devicesByNetwork] || [];
+    // Filter only MS devices
+    return devices.filter(device => device.model && device.model.startsWith('MS'));
   },
 
   async getSwitchPorts(serialNumber: string) {
@@ -102,41 +109,3 @@ export const merakiApi = {
     return ports;
   }
 };
-
-// Real implementation example with the API key:
-/*
-import axios from 'axios';
-
-const merakiClient = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'X-Cisco-Meraki-API-Key': API_KEY,
-    'Content-Type': 'application/json'
-  }
-});
-
-export const merakiApi = {
-  async getOrganizations() {
-    const response = await merakiClient.get('/organizations');
-    return response.data;
-  },
-
-  async getNetworks(organizationId: string) {
-    const response = await merakiClient.get(`/organizations/${organizationId}/networks`);
-    return response.data;
-  },
-
-  async getDevices(organizationId: string) {
-    const response = await merakiClient.get(`/organizations/${organizationId}/devices`);
-    // Filter for switches
-    return response.data.filter(device => 
-      device.model && device.model.includes('MS')
-    );
-  },
-
-  async getSwitchPorts(serialNumber: string) {
-    const response = await merakiClient.get(`/devices/${serialNumber}/switch/ports`);
-    return response.data;
-  }
-};
-*/

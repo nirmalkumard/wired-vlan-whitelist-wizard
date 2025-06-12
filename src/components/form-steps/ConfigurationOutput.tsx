@@ -24,14 +24,32 @@ export const ConfigurationOutput: React.FC<Props> = ({
   const [webhookUrl, setWebhookUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const outputJson = {
-    orgId: formData.organizationId,
-    networkId: formData.networkId,
-    serialNumber: formData.deviceSerial,
-    vlan: formData.vlan,
-    macId: formData.macId,
-    portNumber: formData.portNumber
+  const generateOutputJson = () => {
+    const baseConfig = {
+      orgId: formData.organizationId,
+      networkId: formData.networkId,
+      macId: formData.macId,
+      useCase: formData.useCase,
+      operation: formData.operation
+    };
+
+    if (formData.useCase === 'WiFi') {
+      return {
+        ...baseConfig,
+        ssid: formData.ssid,
+        clientName: formData.clientName
+      };
+    } else {
+      return {
+        ...baseConfig,
+        vlan: formData.vlan,
+        serialNumber: formData.deviceSerial,
+        portNumber: formData.portNumber
+      };
+    }
   };
+
+  const outputJson = generateOutputJson();
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(JSON.stringify(outputJson, null, 2));
@@ -97,7 +115,7 @@ export const ConfigurationOutput: React.FC<Props> = ({
           Configuration Complete!
         </h3>
         <p className="text-slate-600">
-          Your MAC Whitelisting & VLAN Tagging configuration has been generated successfully.
+          Your {formData.operation} configuration has been generated successfully.
         </p>
       </div>
 
@@ -123,20 +141,39 @@ export const ConfigurationOutput: React.FC<Props> = ({
               <span className="text-slate-600">Operation:</span>
               <span className="font-medium text-sm">{formData.operation}</span>
             </div>
+            
+            {formData.useCase === 'WiFi' && (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">SSID:</span>
+                  <span className="font-medium">{formData.ssidName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Client Name:</span>
+                  <span className="font-medium">{formData.clientName}</span>
+                </div>
+              </>
+            )}
+            
+            {formData.useCase === 'Wired' && (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Device:</span>
+                  <span className="font-medium">{formData.deviceName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Port:</span>
+                  <Badge variant="outline">{formData.portNumber}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">VLAN:</span>
+                  <Badge className="bg-blue-100 text-blue-800">{formData.vlan}</Badge>
+                </div>
+              </>
+            )}
+            
             <div className="flex justify-between">
-              <span className="text-slate-600">Device:</span>
-              <span className="font-medium">{formData.deviceName}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">Port:</span>
-              <Badge variant="outline">{formData.portNumber}</Badge>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">VLAN:</span>
-              <Badge className="bg-blue-100 text-blue-800">{formData.vlan}</Badge>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-600">MAC ID:</span>
+              <span className="text-slate-600">MAC Address:</span>
               <code className="text-sm bg-slate-100 px-2 py-1 rounded">{formData.macId}</code>
             </div>
           </CardContent>
@@ -200,7 +237,11 @@ export const ConfigurationOutput: React.FC<Props> = ({
           <li>Enter your n8n webhook URL above and submit the configuration</li>
           <li>The n8n workflow will receive the configuration data automatically</li>
           <li>Use the configuration with your Meraki API integration in n8n</li>
-          <li>Apply the MAC whitelisting and VLAN tagging to the specified port</li>
+          {formData.useCase === 'WiFi' ? (
+            <li>Apply the MAC whitelisting to the specified SSID</li>
+          ) : (
+            <li>Apply the MAC whitelisting and VLAN tagging to the specified port</li>
+          )}
           <li>Verify the configuration in your Meraki dashboard</li>
         </ul>
       </div>

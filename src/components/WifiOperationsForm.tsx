@@ -13,11 +13,17 @@ export interface FormData {
   networkName: string;
   useCase: 'WiFi' | 'Wired' | '';
   operation: string;
+  // WiFi specific fields
+  ssid: string;
+  ssidName: string;
+  clientName: string;
+  // Wired specific fields
   vlan: string;
-  macId: string;
   deviceSerial: string;
   deviceName: string;
   portNumber: string;
+  // Common field
+  macId: string;
 }
 
 export const WifiOperationsForm = () => {
@@ -29,6 +35,9 @@ export const WifiOperationsForm = () => {
     networkName: '',
     useCase: '',
     operation: '',
+    ssid: '',
+    ssidName: '',
+    clientName: '',
     vlan: '',
     macId: '',
     deviceSerial: '',
