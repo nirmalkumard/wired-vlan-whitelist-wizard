@@ -69,7 +69,8 @@ export const OrganizationalContext: React.FC<Props> = ({
       organizationId: value,
       organizationName: selectedOrg?.name || '',
       networkId: '',
-      networkName: ''
+      networkName: '',
+      operation: ''
     });
     setNetworks([]);
   };
@@ -96,7 +97,7 @@ export const OrganizationalContext: React.FC<Props> = ({
         <div className="space-y-2">
           <Label htmlFor="organization" className="flex items-center gap-2">
             <Building className="w-4 h-4" />
-            Customer (Organization)
+            Customer (Org ID)
           </Label>
           <Select 
             value={formData.organizationId} 
@@ -109,7 +110,7 @@ export const OrganizationalContext: React.FC<Props> = ({
             <SelectContent className="bg-white border border-slate-200 shadow-lg z-50">
               {organizations.map((org) => (
                 <SelectItem key={org.id} value={org.id}>
-                  {org.name}
+                  {org.name} ({org.id})
                 </SelectItem>
               ))}
             </SelectContent>
@@ -119,7 +120,7 @@ export const OrganizationalContext: React.FC<Props> = ({
         <div className="space-y-2">
           <Label htmlFor="network" className="flex items-center gap-2">
             <Network className="w-4 h-4" />
-            Site (Network)
+            Site (Network ID)
           </Label>
           <Select 
             value={formData.networkId} 
@@ -138,7 +139,7 @@ export const OrganizationalContext: React.FC<Props> = ({
             <SelectContent className="bg-white border border-slate-200 shadow-lg z-50">
               {networks.map((network) => (
                 <SelectItem key={network.id} value={network.id}>
-                  {network.name}
+                  {network.name} ({network.id})
                 </SelectItem>
               ))}
             </SelectContent>
@@ -178,14 +179,14 @@ export const OrganizationalContext: React.FC<Props> = ({
               <SelectValue placeholder={!formData.useCase ? "Select use case first" : "Select operation"} />
             </SelectTrigger>
             <SelectContent className="bg-white border border-slate-200 shadow-lg z-50">
-              {formData.useCase === 'Wired' && (
-                <SelectItem value="MAC Whitelisting and VLAN Tagging">
-                  MAC Whitelisting and VLAN Tagging
+              {formData.useCase === 'WiFi' && (
+                <SelectItem value="MAC Whitelisting">
+                  MAC Whitelisting
                 </SelectItem>
               )}
-              {formData.useCase === 'WiFi' && (
-                <SelectItem value="WiFi Configuration">
-                  WiFi Configuration
+              {formData.useCase === 'Wired' && (
+                <SelectItem value="VLAN Tagging and Whitelisting">
+                  VLAN Tagging and Whitelisting
                 </SelectItem>
               )}
             </SelectContent>
