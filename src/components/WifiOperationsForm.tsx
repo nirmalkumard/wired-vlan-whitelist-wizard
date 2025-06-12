@@ -1,0 +1,174 @@
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { OrganizationalContext } from './form-steps/OrganizationalContext';
+import { ParameterConfiguration } from './form-steps/ParameterConfiguration';
+import { ConfigurationOutput } from './form-steps/ConfigurationOutput';
+import { Badge } from '@/components/ui/badge';
+
+export interface FormData {
+  organizationId: string;
+  organizationName: string;
+  networkId: string;
+  networkName: string;
+  useCase: 'WiFi' | 'Wired' | '';
+  operation: string;
+  vlan: string;
+  macId: string;
+  deviceSerial: string;
+  deviceName: string;
+  portNumber: string;
+}
+
+export const WifiOperationsForm = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [formData, setFormData] = useState<FormData>({
+    organizationId: '',
+    organizationName: '',
+    networkId: '',
+    networkName: '',
+    useCase: '',
+    operation: '',
+    vlan: '',
+    macId: '',
+    deviceSerial: '',
+    deviceName: '',
+    portNumber: ''
+  });
+
+  const updateFormData = (updates: Partial<FormData>) => {
+    setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const handleStepComplete = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBackToStep = (step: number) => {
+    setCurrentStep(step);
+  };
+
+  const getStepStatus = (step: number) => {
+    if (step < currentStep) return 'completed';
+    if (step === currentStep) return 'active';
+    return 'pending';
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Progress Indicator */}
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex items-center">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-colors ${
+                  getStepStatus(step) === 'completed'
+                    ? 'bg-green-500 text-white'
+                    : getStepStatus(step) === 'active'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-200 text-slate-600'
+                }`}>
+                  {step}
+                </div>
+                <div className="ml-3">
+                  <div className={`text-sm font-medium ${
+                    getStepStatus(step) === 'active' ? 'text-blue-600' : 'text-slate-600'
+                  }`}>
+                    {step === 1 && 'Organizational Context'}
+                    {step === 2 && 'Configure Parameters'}
+                    {step === 3 && 'Review & Output'}
+                  </div>
+                </div>
+                {step < 3 && (
+                  <div className={`ml-6 w-16 h-0.5 ${
+                    getStepStatus(step) === 'completed' ? 'bg-green-500' : 'bg-slate-200'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Step Content */}
+      {currentStep === 1 && (
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                Step 1
+              </Badge>
+              Select Organizational Context
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <OrganizationalContext
+              formData={formData}
+              updateFormData={updateFormData}
+              onComplete={handleStepComplete}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {currentStep === 2 && (
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                Step 2
+              </Badge>
+              Configure Parameters
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <ParameterConfiguration
+              formData={formData}
+              updateFormData={updateFormData}
+              onComplete={handleStepComplete}
+              onBack={() => handleBackToStep(1)}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {currentStep === 3 && (
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-green-50 text-green-700">
+                Step 3
+              </Badge>
+              Configuration Complete
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <ConfigurationOutput
+              formData={formData}
+              onBack={() => handleBackToStep(2)}
+              onReset={() => {
+                setCurrentStep(1);
+                setFormData({
+                  organizationId: '',
+                  organizationName: '',
+                  networkId: '',
+                  networkName: '',
+                  useCase: '',
+                  operation: '',
+                  vlan: '',
+                  macId: '',
+                  deviceSerial: '',
+                  deviceName: '',
+                  portNumber: ''
+                });
+              }}
+            />
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+};
