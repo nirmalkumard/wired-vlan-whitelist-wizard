@@ -2,6 +2,9 @@
 // Mock Meraki API implementation for demonstration
 // In a real implementation, you would use actual Meraki API endpoints with proper authentication
 
+const API_KEY = "d0d45bd7c3fb27eb517c9ae209e5c20dab91fc5d";
+const API_BASE_URL = "https://api.meraki.com/api/v1";
+
 export const merakiApi = {
   async getOrganizations() {
     // Simulate API call delay
@@ -100,12 +103,9 @@ export const merakiApi = {
   }
 };
 
-// In a real implementation, you would configure the API like this:
+// Real implementation example with the API key:
 /*
 import axios from 'axios';
-
-const API_BASE_URL = 'https://api.meraki.com/api/v1';
-const API_KEY = process.env.MERAKI_API_KEY; // Store in environment variables
 
 const merakiClient = axios.create({
   baseURL: API_BASE_URL,
